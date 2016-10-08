@@ -89,13 +89,13 @@ class TerrainNode: SCNNode, SCNProgramDelegate {
 
         terrainNode.geometry!.firstMaterial!.diffuse.contents = image
         
-        //let alpha_texture = SCNMaterialProperty(contents: "art.scnassets/alphamap.png")
-        let grass_texture = SCNMaterialProperty(contents: "art.scnassets/textures/grass.jpg")
-        let dirt_texture = SCNMaterialProperty(contents:image)
+        let alpha_texture = SCNMaterialProperty(contents: "art.scnassets/textures/alphamap.png")
+        let dirt_texture = SCNMaterialProperty(contents: "art.scnassets/textures/dirt.jpg")
+        let grass_texture = SCNMaterialProperty(contents:image)
         
-        terrainNode.geometry!.firstMaterial!.setValue(grass_texture, forKeyPath: "grassTexture")
+        terrainNode.geometry!.firstMaterial!.setValue(alpha_texture, forKeyPath: "alphaTexture")
         terrainNode.geometry!.firstMaterial!.setValue(dirt_texture, forKeyPath: "dirtTexture")
-        //terrainNode.geometry!.firstMaterial!.setValue(alpha_texture, forKeyPath: "alphaTexture")
+
         
         let res = Bundle.main.path(forResource: "terrain", ofType: "shader", inDirectory:"art.scnassets/shaders")
         let surfaceModifier = try? String(contentsOfFile: res!)
