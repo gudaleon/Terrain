@@ -123,3 +123,23 @@ struct Pixel {
     }
 #endif
 
+extension SCNVector3 {
+    func normalize() -> SCNVector3 {
+        let len = sqrt(pow(self.x, 2) + pow(self.y, 2) + pow(self.z, 2))
+        
+        return SCNVector3Make(self.x/len, self.y/len, self.z/len)
+    }
+
+}
+
+class Utils {
+    static func crossProduct(a:SCNVector3, b:SCNVector3) -> SCNVector3 {
+        return SCNVector3Make(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x);
+    }
+    
+    static func vectorSubtract(a:SCNVector3, b:SCNVector3) -> SCNVector3 {
+        return SCNVector3Make(a.x-b.x, a.y-b.y, a.z-b.z);
+    }
+
+}
+

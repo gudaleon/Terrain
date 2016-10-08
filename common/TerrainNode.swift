@@ -148,19 +148,17 @@ class TerrainNode: SCNNode {
                 vertices[col + row*depth] = value
                 
                 let delta:CGFloat = 0.001
-                let dx = vectorSubtract(a: value, b: self.vectorForFunction(one:one+delta, two:two))
-                let dz = vectorSubtract(a: value, b: self.vectorForFunction(one:one, two:two+delta))
+                let dx = Utils.vectorSubtract(a: value, b: self.vectorForFunction(one:one+delta, two:two))
+                let dz = Utils.vectorSubtract(a: value, b: self.vectorForFunction(one:one, two:two+delta))
                 
-                normals[col + row*depth] = normalize( v: crossProduct(a: dz, b: dx) )
+                let v = Utils.crossProduct(a: dz, b: dx)
+                normals[col + row*depth] = v.normalize()
                 
                 textures[col + row*depth] = CGPoint(x:CGFloat(col)/CGFloat(width)*CGFloat(self.textureRepeatCountsone), y:CGFloat(row)/CGFloat(depth)*CGFloat(self.textureRepeatCountstwo))
-                //print("texture coordinate for \(col + row*depth)")
-                //print("are \(CGFloat(col)/CGFloat(width)*CGFloat(self.textureRepeatCountsone), CGFloat(row)/CGFloat(depth)*CGFloat(self.textureRepeatCountstwo))")
             }
         }
         
         // Create geometry sources for the generated data
-        
         let vertexSource = SCNGeometrySource(vertices: vertices, count: pointCount)
         let normalSource = SCNGeometrySource(normals:normals, count: pointCount)
         let textureSource = SCNGeometrySource(textureCoordinates: textures, count: pointCount)
@@ -168,8 +166,6 @@ class TerrainNode: SCNNode {
         // Configure the indices that was to be interpreted as a
         // triangle strip using
         
-        //print("Indices are :\(indices)")
-        //print("Indices size:\(MemoryLayout<CInt>.size*numberOfIndices)")
         let data = NSData(bytes: indices, length: MemoryLayout<UInt32>.size*(numberOfIndices))
         let element = SCNGeometryElement(data: data as Data, primitiveType: .triangleStrip, primitiveCount: numberOfIndices, bytesPerIndex: MemoryLayout<UInt32>.size)
         
@@ -216,19 +212,6 @@ class TerrainNode: SCNNode {
         }
     }
     
-    private func crossProduct(a:SCNVector3, b:SCNVector3) -> SCNVector3 {
-        return SCNVector3Make(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x);
-    }
-    
-    private func normalize(v:SCNVector3) -> SCNVector3 {
-        let len = sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2));
-        
-        return SCNVector3Make(v.x/len, v.y/len, v.z/len);
-    }
-    
-    private func vectorSubtract(a:SCNVector3, b:SCNVector3) -> SCNVector3 {
-        return SCNVector3Make(a.x-b.x, a.y-b.y, a.z-b.z);
-    }
     
     private func vectorForFunction(one:CGFloat, two:CGFloat) -> SCNVector3 {
         return SCNVector3Make(SCNFloat(one), SCNFloat(heightFromMap(x:Int(one-self.rangeOnemin), y:Int(two-self.rangeTwomin))), SCNFloat(two))
