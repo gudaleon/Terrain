@@ -15,7 +15,7 @@ enum TerrainType: Int {
 }
 typealias TerrainFormula = ((Int32, Int32) -> (Double))
 
-class TerrainNode: SCNNode {
+class TerrainNode: SCNNode, SCNProgramDelegate {
     private let rangeOne:float2
     private let rangeTwo:float2
     private let textureRepeatCount = float2(8, 8)
@@ -36,7 +36,6 @@ class TerrainNode: SCNNode {
         self.formula = {(x: Int32, y: Int32) in
             return generator.valueFor(x: x, y: y)
         }
-
         super.init()
     }
     
@@ -64,6 +63,7 @@ class TerrainNode: SCNNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    
     func create(withColor color: SKColor) {
         let terrainNode = SCNNode(geometry: createGeometry())
         self.addChildNode(terrainNode)
@@ -81,6 +81,7 @@ class TerrainNode: SCNNode {
         terrainNode.physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.static, shape: nil)
         terrainNode.name = "terrain"
     }
+    
     
     func create(withMultipleTextures image:GameImage) {
         let terrainNode = SCNNode(geometry: createGeometry())
@@ -100,6 +101,7 @@ class TerrainNode: SCNNode {
         let surfaceModifier = try? String(contentsOfFile: res!)
         terrainNode.geometry!.firstMaterial?.shaderModifiers = [SCNShaderModifierEntryPoint.surface: surfaceModifier!]
     }
+    
 
     private func createGeometry() -> SCNGeometry {
         
@@ -246,6 +248,5 @@ class TerrainNode: SCNNode {
     private func vectorForFunction(one:SCNFloat, two:SCNFloat) -> SCNVector3 {
         return SCNVector3Make(SCNFloat(one), SCNFloat(heightFromMap(x:Int(one-SCNFloat(self.rangeOne.x)), y:Int(two-SCNFloat(self.rangeTwo.x)))), SCNFloat(two))
     }
-
-
+    
 }

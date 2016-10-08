@@ -296,12 +296,10 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
         cameraNode.position = SCNVector3Make(newCameraPosition.x, height, newCameraPosition.z)
     }
     
-    private func getGroundHeight(position:SCNVector3) -> SCNFloat
-    {
+    private func getGroundHeight(position:SCNVector3) -> SCNFloat {
         return terrain.getHeight(x:position.x, y:position.z) + CAMERA_Y_POSITION
     }
 
-    
     private func addFloor() {
         let floorNode = SCNNode()
         let floor = SCNFloor()
@@ -317,11 +315,10 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
     private func addTerrain() {
         //terrain = TerrainNode(width: 256, depth:256)
         terrain = TerrainNode(imageName: "heightmap", imageType: "png", inDirectory: "art.scnassets/textures")
-        if let imagePath = Bundle.main.path(forResource: "dirt", ofType: "jpg", inDirectory: "art.scnassets/textures")
-        {
-            let dirt_texture = GameImage(contentsOfFile: imagePath)!
+        if let imagePath = Bundle.main.path(forResource: "grass", ofType: "jpg", inDirectory: "art.scnassets/textures") {
+            let grass_texture = GameImage(contentsOfFile: imagePath)!
             //terrain.create(withTexture:dirt_texture)
-            terrain.create(withMultipleTextures:dirt_texture)
+            terrain.create(withMultipleTextures:grass_texture)
         } else {
             terrain.create(withColor: SKColor.green)
         }
