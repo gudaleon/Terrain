@@ -309,8 +309,8 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
     }
 
     private func addTerrain() {
-        let terrain = TerrainNode(width: 256, depth:256)
-        //let terrain = TerrainNode(imageName: "heightmap", imageType: "png", inDirectory: "art.scnassets/textures")
+        //let terrain = TerrainNode(width: 256, depth:256)
+        let terrain = TerrainNode(imageName: "heightmap", imageType: "png", inDirectory: "art.scnassets/textures")
         if let imagePath = Bundle.main.path(forResource: "dirt", ofType: "jpg", inDirectory: "art.scnassets/textures")
         {
             let dirt_texture = GameImage(contentsOfFile: imagePath)!

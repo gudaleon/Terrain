@@ -15,7 +15,14 @@ class PerlinNoiseGenerator {
     
     private var _seed: Int = 1
     
-    // -------------------------------------------------------------------------
+    init(seed: Int? = nil) {
+        if (seed == nil) {
+            _seed = Int(arc4random()) % Int(INT32_MAX)
+        }
+        else {
+            _seed = seed!
+        }
+    }
     
     private func interpolate(a: Double, b: Double, x: Double) ->Double {
         let ft: Double = x * M_PI
@@ -23,8 +30,6 @@ class PerlinNoiseGenerator {
         
         return a*(1.0-f)+b*f
     }
-    
-    // -------------------------------------------------------------------------
     
     private func findNoise(x: Double, y: Double) ->Double {
         var n = (PerlinNoiseGenerator.noiseX*Int(x) +
@@ -36,8 +41,6 @@ class PerlinNoiseGenerator {
         
         return 1.0 - Double(n)/1073741824
     }
-    
-    // -------------------------------------------------------------------------
     
     private func noise(x: Double, y: Double) ->Double {
         let floorX: Double = Double(Int(x))
@@ -53,9 +56,6 @@ class PerlinNoiseGenerator {
         
         return interpolate(a: i1, b:i2, x:y-floorY)
     }
-    
-    // -------------------------------------------------------------------------
-    // MARK: - Calculate a noise value for x,y
     
     func valueFor(x: Int32, y: Int32) ->Double {
         let octaves = 2
@@ -81,19 +81,5 @@ class PerlinNoiseGenerator {
         
         return value
     }
-    
-    // -------------------------------------------------------------------------
-    // MARK: - Initialisation
-    
-    init(seed: Int? = nil) {
-        if (seed == nil) {
-            _seed = Int(arc4random()) % Int(INT32_MAX)
-        }
-        else {
-            _seed = seed!
-        }
-    }
-    
-    // -------------------------------------------------------------------------
     
 }
