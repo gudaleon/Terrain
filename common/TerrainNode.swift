@@ -18,7 +18,7 @@ typealias TerrainFormula = ((Int32, Int32) -> (Double))
 class TerrainNode: SCNNode {
     private let rangeOne:float2
     private let rangeTwo:float2
-    private let textureRepeatCount = float2( 10, 10)
+    private let textureRepeatCount = float2(8, 8)
 
     let width:Int
     let depth:Int
@@ -90,7 +90,7 @@ class TerrainNode: SCNNode {
         
         //let alpha_texture = SCNMaterialProperty(contents: "art.scnassets/alphamap.png")
         let grass_texture = SCNMaterialProperty(contents: "art.scnassets/textures/grass.jpg")
-        let dirt_texture = SCNMaterialProperty(contents:"art.scnassets/textures/dirt.jpg")
+        let dirt_texture = SCNMaterialProperty(contents:image)
         
         terrainNode.geometry!.firstMaterial!.setValue(grass_texture, forKeyPath: "grassTexture")
         terrainNode.geometry!.firstMaterial!.setValue(dirt_texture, forKeyPath: "dirtTexture")
@@ -175,6 +175,7 @@ class TerrainNode: SCNNode {
                 normals[col + row*depth] = v.normalize()
                 
                 textures[col + row*depth] = CGPoint(x:CGFloat(col)/CGFloat(width)*CGFloat(self.textureRepeatCount.x), y:CGFloat(row)/CGFloat(depth)*CGFloat(self.textureRepeatCount.y))
+                //print("Texcoord is \(textures[col + row*depth])")
             }
         }
         
