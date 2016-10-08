@@ -16,12 +16,9 @@ enum TerrainType: Int {
 typealias TerrainFormula = ((Int32, Int32) -> (Double))
 
 class TerrainNode: SCNNode {
-    private let rangeOnemax:SCNFloat = 128.0
-    private let rangeOnemin:SCNFloat = -128.0
-    private let rangeTwomax:SCNFloat = 128.0
-    private let rangeTwomin:SCNFloat = -128.0
-    private let textureRepeatCountsone = 10
-    private let textureRepeatCountstwo = 10
+    private let rangeOne:float2
+    private let rangeTwo:float2
+    private let textureRepeatCount = float2( 10, 10)
 
     let width:Int
     let depth:Int
@@ -33,6 +30,8 @@ class TerrainNode: SCNNode {
         type = .perlinnoise
         self.width = width
         self.depth = depth
+        rangeOne = float2(-Float(width)/Float(2.0), Float(width)/Float(2.0))
+        rangeTwo = float2(-Float(depth)/Float(2.0), Float(depth)/Float(2.0))
         let generator = PerlinNoiseGenerator(seed: nil)
         self.formula = {(x: Int32, y: Int32) in
             return generator.valueFor(x: x, y: y)
@@ -56,6 +55,8 @@ class TerrainNode: SCNNode {
         } else {
             fatalError("Cannot read heightmap")
         }
+        rangeOne = float2(-Float(width)/Float(2.0), Float(width)/Float(2.0))
+        rangeTwo = float2(-Float(depth)/Float(2.0), Float(depth)/Float(2.0))
         super.init()
     }
     
@@ -79,6 +80,25 @@ class TerrainNode: SCNNode {
         terrainNode.geometry!.firstMaterial!.diffuse.contents = image
         terrainNode.physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.static, shape: nil)
         terrainNode.name = "terrain"
+    }
+    
+    func create(withMultipleTextures image:GameImage) {
+        let terrainNode = SCNNode(geometry: createGeometry())
+        self.addChildNode(terrainNode)
+
+        terrainNode.geometry!.firstMaterial!.diffuse.contents = image
+        
+        //let alpha_texture = SCNMaterialProperty(contents: "art.scnassets/alphamap.png")
+        let grass_texture = SCNMaterialProperty(contents: "art.scnassets/textures/grass.jpg")
+        let dirt_texture = SCNMaterialProperty(contents:"art.scnassets/textures/dirt.jpg")
+        
+        terrainNode.geometry!.firstMaterial!.setValue(grass_texture, forKeyPath: "grassTexture")
+        terrainNode.geometry!.firstMaterial!.setValue(dirt_texture, forKeyPath: "dirtTexture")
+        //terrainNode.geometry!.firstMaterial!.setValue(alpha_texture, forKeyPath: "alphaTexture")
+        
+        let res = Bundle.main.path(forResource: "terrain", ofType: "shader", inDirectory:"art.scnassets/shaders")
+        let surfaceModifier = try? String(contentsOfFile: res!)
+        terrainNode.geometry!.firstMaterial?.shaderModifiers = [SCNShaderModifierEntryPoint.surface: surfaceModifier!]
     }
 
     private func createGeometry() -> SCNGeometry {
@@ -140,8 +160,8 @@ class TerrainNode: SCNNode {
         // and texture coordinate for each x,z pair.
         for row in stride(from:0, to:width, by:1) {
             for col in stride(from:0, to:depth, by:1) {
-                let one:SCNFloat = SCNFloat(col)/SCNFloat(width-1) * SCNFloat(self.rangeOnemax - self.rangeOnemin) + SCNFloat(self.rangeOnemin)
-                let two:SCNFloat = SCNFloat(row)/SCNFloat(depth-1) * SCNFloat(self.rangeTwomax - self.rangeTwomin) + SCNFloat(self.rangeTwomin)
+                let one:SCNFloat = SCNFloat(col)/SCNFloat(width-1) * SCNFloat(self.rangeOne.y - self.rangeOne.x) + SCNFloat(self.rangeOne.x)
+                let two:SCNFloat = SCNFloat(row)/SCNFloat(depth-1) * SCNFloat(self.rangeTwo.y - self.rangeTwo.x) + SCNFloat(self.rangeTwo.x)
                 
                 let value = self.vectorForFunction(one:one, two:two)
                 
@@ -154,7 +174,7 @@ class TerrainNode: SCNNode {
                 let v = Utils.crossProduct(a: dz, b: dx)
                 normals[col + row*depth] = v.normalize()
                 
-                textures[col + row*depth] = CGPoint(x:CGFloat(col)/CGFloat(width)*CGFloat(self.textureRepeatCountsone), y:CGFloat(row)/CGFloat(depth)*CGFloat(self.textureRepeatCountstwo))
+                textures[col + row*depth] = CGPoint(x:CGFloat(col)/CGFloat(width)*CGFloat(self.textureRepeatCount.x), y:CGFloat(row)/CGFloat(depth)*CGFloat(self.textureRepeatCount.y))
             }
         }
         
@@ -189,18 +209,16 @@ class TerrainNode: SCNNode {
         repeatingTextureMaterial.shininess = 0.1250
         
         geometry.materials = [repeatingTextureMaterial]
-        
         return geometry
-        
     }
 
     func getHeight(x:SCNFloat, y:SCNFloat) -> SCNFloat {
-        if(x <= self.rangeOnemin || x >= self.rangeOnemax || y <= self.rangeTwomin || y >= self.rangeTwomax) {
+        if(x <= SCNFloat(self.rangeOne.x) || x >= SCNFloat(self.rangeOne.y) || y <= SCNFloat(self.rangeTwo.x) || y >= SCNFloat(self.rangeTwo.y)) {
             return 0.0
         }
         
-        let x1 = Int(x - self.rangeOnemin)
-        let y1 = Int(y - self.rangeTwomin)
+        let x1 = Int(x - SCNFloat(self.rangeOne.x))
+        let y1 = Int(y - SCNFloat(self.rangeTwo.x))
         
         return SCNFloat(heightFromMap(x:x1, y:y1))
     }
@@ -225,7 +243,7 @@ class TerrainNode: SCNNode {
     
     
     private func vectorForFunction(one:SCNFloat, two:SCNFloat) -> SCNVector3 {
-        return SCNVector3Make(SCNFloat(one), SCNFloat(heightFromMap(x:Int(one-self.rangeOnemin), y:Int(two-self.rangeTwomin))), SCNFloat(two))
+        return SCNVector3Make(SCNFloat(one), SCNFloat(heightFromMap(x:Int(one-SCNFloat(self.rangeOne.x)), y:Int(two-SCNFloat(self.rangeTwo.x)))), SCNFloat(two))
     }
 
 
