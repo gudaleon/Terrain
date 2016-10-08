@@ -16,10 +16,10 @@ enum TerrainType: Int {
 typealias TerrainFormula = ((Int32, Int32) -> (Double))
 
 class TerrainNode: SCNNode {
-    private let rangeOnemax:CGFloat = 128.0
-    private let rangeOnemin:CGFloat = -128.0
-    private let rangeTwomax:CGFloat = 128.0
-    private let rangeTwomin:CGFloat = -128.0
+    private let rangeOnemax:SCNFloat = 128.0
+    private let rangeOnemin:SCNFloat = -128.0
+    private let rangeTwomax:SCNFloat = 128.0
+    private let rangeTwomin:SCNFloat = -128.0
     private let textureRepeatCountsone = 10
     private let textureRepeatCountstwo = 10
 
@@ -140,14 +140,14 @@ class TerrainNode: SCNNode {
         // and texture coordinate for each x,z pair.
         for row in stride(from:0, to:width, by:1) {
             for col in stride(from:0, to:depth, by:1) {
-                let one:CGFloat = CGFloat(col)/CGFloat(width-1) * CGFloat(self.rangeOnemax - self.rangeOnemin) + CGFloat(self.rangeOnemin)
-                let two:CGFloat = CGFloat(row)/CGFloat(depth-1) * CGFloat(self.rangeTwomax - self.rangeTwomin) + CGFloat(self.rangeTwomin)
+                let one:SCNFloat = SCNFloat(col)/SCNFloat(width-1) * SCNFloat(self.rangeOnemax - self.rangeOnemin) + SCNFloat(self.rangeOnemin)
+                let two:SCNFloat = SCNFloat(row)/SCNFloat(depth-1) * SCNFloat(self.rangeTwomax - self.rangeTwomin) + SCNFloat(self.rangeTwomin)
                 
                 let value = self.vectorForFunction(one:one, two:two)
                 
                 vertices[col + row*depth] = value
                 
-                let delta:CGFloat = 0.001
+                let delta:SCNFloat = 0.001
                 let dx = Utils.vectorSubtract(a: value, b: self.vectorForFunction(one:one+delta, two:two))
                 let dz = Utils.vectorSubtract(a: value, b: self.vectorForFunction(one:one, two:two+delta))
                 
@@ -194,6 +194,17 @@ class TerrainNode: SCNNode {
         
     }
 
+    func getHeight(x:SCNFloat, y:SCNFloat) -> SCNFloat {
+        if(x <= self.rangeOnemin || x >= self.rangeOnemax || y <= self.rangeTwomin || y >= self.rangeTwomax) {
+            return 0.0
+        }
+        
+        let x1 = Int(x - self.rangeOnemin)
+        let y1 = Int(y - self.rangeTwomin)
+        
+        return SCNFloat(heightFromMap(x:x1, y:y1))
+    }
+    
     private func heightFromMap(x:Int, y:Int) -> CGFloat {
         if(type == .heightmap) {
             //print("Getting height of pixel:\(x),\(y)")
@@ -213,7 +224,7 @@ class TerrainNode: SCNNode {
     }
     
     
-    private func vectorForFunction(one:CGFloat, two:CGFloat) -> SCNVector3 {
+    private func vectorForFunction(one:SCNFloat, two:SCNFloat) -> SCNVector3 {
         return SCNVector3Make(SCNFloat(one), SCNFloat(heightFromMap(x:Int(one-self.rangeOnemin), y:Int(two-self.rangeTwomin))), SCNFloat(two))
     }
 

@@ -122,7 +122,7 @@ class GameSceneView : SCNView {
         // Assign the SpriteKit overlay to the SceneKit view.
         overlaySKScene = skScene
         
-        //self.debugOptions = SCNDebugOptions.showPhysicsShapes
+        self.debugOptions = SCNDebugOptions.showPhysicsShapes
         //self.debugOptions = SCNDebugOptions.showWireframe
         // allows the user to manipulate the camera
         //self.allowsCameraControl = true

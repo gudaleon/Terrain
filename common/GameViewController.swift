@@ -17,6 +17,8 @@ import SceneKit
 #endif
 
 class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDelegate {
+    let CAMERA_Y_POSITION:SCNFloat = 10.0
+    var terrain:TerrainNode!
     var cameraNode:SCNNode!
     var scnView:SCNView?
     var scene:SCNScene!
@@ -35,7 +37,6 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
         self.gameView!.addSubview(view)
         self.scnView = view
 
-    
         // Create a bottom space constraint
         var constraint = NSLayoutConstraint (item: view,
                             attribute: NSLayoutAttribute.bottom,
@@ -83,8 +84,6 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
     func handleKeyDown(with event: NSEvent) {
         // Return Key
         if(event.keyCode == 36) {
-            //let moveAction = SCNAction.moveBy(x: 0, y: 0, z: 200, duration: 20)
-            //player.runAction(moveAction)
             self.lookAround()
             return
         }
@@ -121,7 +120,6 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
     
         let location:CGPoint = theEvent.location(in: overlayScene)
         let node:SKNode = overlayScene.atPoint(location)
-        print("Node name is \(node.name)")
         if let name = node.name { // Check if node name is not nil
             if(name == "cameraNode") {
             self.lookAround()
@@ -145,7 +143,6 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
         self.view.addSubview(view)
         
         self.setupScene()
-
     }
     
     override var shouldAutorotate: Bool {
@@ -247,7 +244,7 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
         scene.rootNode.addChildNode(cameraNode!)
         
         // place the camera
-        cameraNode.position = SCNVector3(x: 0, y: 10, z: 15)
+        cameraNode.position = SCNVector3(x: 0, y: CAMERA_Y_POSITION, z: 15)
         
         // create and add a light to the scene
         let lightNode = SCNNode()
@@ -292,9 +289,18 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
         if(delX == 0.0 && delZ == 0.0) {
             return
         }
+        
         let newCameraPosition = SCNVector3Make(cameraNode.position.x-delX, cameraNode.position.y, cameraNode.position.z-delZ)
-        cameraNode.position = newCameraPosition
+        let height = self.getGroundHeight(position:newCameraPosition)
+        //print("ground height is \(height)")
+        cameraNode.position = SCNVector3Make(newCameraPosition.x, height, newCameraPosition.z)
     }
+    
+    private func getGroundHeight(position:SCNVector3) -> SCNFloat
+    {
+        return terrain.getHeight(x:position.x, y:position.z) + CAMERA_Y_POSITION
+    }
+
     
     private func addFloor() {
         let floorNode = SCNNode()
@@ -310,7 +316,7 @@ class GameViewController: ViewController, GameInputDelegate, SCNSceneRendererDel
 
     private func addTerrain() {
         //let terrain = TerrainNode(width: 256, depth:256)
-        let terrain = TerrainNode(imageName: "heightmap", imageType: "png", inDirectory: "art.scnassets/textures")
+        terrain = TerrainNode(imageName: "heightmap", imageType: "png", inDirectory: "art.scnassets/textures")
         if let imagePath = Bundle.main.path(forResource: "dirt", ofType: "jpg", inDirectory: "art.scnassets/textures")
         {
             let dirt_texture = GameImage(contentsOfFile: imagePath)!
